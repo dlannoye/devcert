@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { writeFileSync as write, readFileSync as read } from 'fs';
 import { Options } from '../index';
 import { openCertificateInFirefox } from './shared';
-import { Platform } from '.';
+import { Platform, domainExistsInHostFile } from '.';
 import { run, sudo } from '../utils';
 import UI from '../user-interface';
 
@@ -45,14 +45,9 @@ export default class WindowsPlatform implements Platform {
   }
 
   async addDomainToHostFileIfMissing(domain: string) {
-    let hostsFileContents = read(this.HOST_FILE_PATH, 'utf8');
+    const hostsFileContents = read(this.HOST_FILE_PATH, 'utf8');
 
-    const isPresent = hostsFileContents
-      .replace(/\s+/g, ' ')
-      .split(' ')
-      .filter(item => item === domain).length > 0;
-
-    if (!isPresent) {
+    if (!domainExistsInHostFile(hostsFileContents, domain)) {
       await sudo(`echo 127.0.0.1  ${ domain } >> ${ this.HOST_FILE_PATH }`);
     }
   }

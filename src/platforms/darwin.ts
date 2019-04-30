@@ -5,7 +5,7 @@ import { sync as commandExists } from 'command-exists';
 import { run } from '../utils';
 import { Options } from '../index';
 import { addCertificateToNSSCertDB, openCertificateInFirefox, closeFirefox } from './shared';
-import { Platform } from '.';
+import { Platform, domainExistsInHostFile } from '.';
 
 const debug = createDebug('devcert:platforms:macos');
 
@@ -58,7 +58,8 @@ export default class MacOSPlatform implements Platform {
 
   async addDomainToHostFileIfMissing(domain: string) {
     let hostsFileContents = read(this.HOST_FILE_PATH, 'utf8');
-    if (!hostsFileContents.includes(domain)) {
+
+    if (!domainExistsInHostFile(hostsFileContents, domain)) {
       run(`echo '127.0.0.1  ${ domain }' | sudo tee -a "${ this.HOST_FILE_PATH }" > /dev/null`);
     }
   }

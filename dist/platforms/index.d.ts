@@ -5,5 +5,6 @@ export interface Platform {
     readProtectedFile(filepath: string): Promise<string>;
     writeProtectedFile(filepath: string, contents: string): Promise<void>;
 }
+export declare function domainExistsInHostFile(hostFileContents: string, domain: string): boolean;
 declare const _default: Platform;
 export default _default;
