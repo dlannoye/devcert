@@ -6,7 +6,7 @@ import { addCertificateToNSSCertDB, openCertificateInFirefox, closeFirefox } fro
 import { run } from '../utils';
 import { Options } from '../index';
 import UI from '../user-interface';
-import { Platform } from '.';
+import { Platform, domainExistsInHostFile } from '.';
 
 const debug = createDebug('devcert:platforms:linux');
 
@@ -70,7 +70,8 @@ export default class LinuxPlatform implements Platform {
 
   async addDomainToHostFileIfMissing(domain: string) {
     let hostsFileContents = read(this.HOST_FILE_PATH, 'utf8');
-    if (!hostsFileContents.includes(domain)) {
+
+    if (!domainExistsInHostFile(hostsFileContents, domain)) {
       run(`echo '127.0.0.1  ${ domain }' | sudo tee -a "${ this.HOST_FILE_PATH }" > /dev/null`);
     }
   }
