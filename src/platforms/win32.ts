@@ -4,7 +4,7 @@ import { writeFileSync as write, readFileSync as read } from 'fs';
 import { Options } from '../index';
 import { openCertificateInFirefox } from './shared';
 import { Platform } from '.';
-import { isDomainInHostFile, run, sudo,  } from '../utils';
+import { run, sudo } from '../utils';
 import UI from '../user-interface';
 
 const debug = createDebug('devcert:platforms:windows');
@@ -12,8 +12,6 @@ const debug = createDebug('devcert:platforms:windows');
 let encryptionKey: string;
 
 export default class WindowsPlatform implements Platform {
-
-  private HOST_FILE_PATH = 'C:\\Windows\\System32\\Drivers\\etc\\hosts';
 
   /**
    * Windows is at least simple. Like macOS, most applications will delegate to
@@ -45,10 +43,7 @@ export default class WindowsPlatform implements Platform {
   }
 
   async addDomainToHostFileIfMissing(domain: string) {
-    let hostsFileContents = read(this.HOST_FILE_PATH, 'utf8');
-    if (!isDomainInHostFile(hostsFileContents, domain)) {
-      await sudo(`echo 127.0.0.1  ${ domain } > ${ this.HOST_FILE_PATH }`);
-    }
+      await sudo(`"${process.execPath}" "${require.resolve('hostile/bin/cmd')}" set 127.0.0.1 ${domain}`);
   }
 
   async readProtectedFile(filepath: string): Promise<string> {

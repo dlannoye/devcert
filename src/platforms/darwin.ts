@@ -1,8 +1,8 @@
 import path from 'path';
-import { writeFileSync as writeFile, existsSync as exists, readFileSync as read } from 'fs';
+import { writeFileSync as writeFile, existsSync as exists } from 'fs';
 import createDebug from 'debug';
 import { sync as commandExists } from 'command-exists';
-import { isDomainInHostFile, run } from '../utils';
+import { run } from '../utils';
 import { Options } from '../index';
 import { addCertificateToNSSCertDB, openCertificateInFirefox, closeFirefox } from './shared';
 import { Platform } from '.';
@@ -15,8 +15,6 @@ export default class MacOSPlatform implements Platform {
   private FIREFOX_BUNDLE_PATH = '/Applications/Firefox.app';
   private FIREFOX_BIN_PATH = path.join(this.FIREFOX_BUNDLE_PATH, 'Contents/MacOS/firefox');
   private FIREFOX_NSS_DIR = path.join(process.env.HOME, 'Library/Application Support/Firefox/Profiles/*');
-
-  private HOST_FILE_PATH = '/etc/hosts';
 
   /**
    * macOS is pretty simple - just add the certificate to the system keychain,
@@ -56,13 +54,10 @@ export default class MacOSPlatform implements Platform {
     }
   }
 
-  async addDomainToHostFileIfMissing(domain: string) {
-    let hostsFileContents = read(this.HOST_FILE_PATH, 'utf8');
-    if (!isDomainInHostFile(hostsFileContents, domain)) {
-      run(`echo '\n127.0.0.1 ${ domain }' | sudo tee -a "${ this.HOST_FILE_PATH }" > /dev/null`);
-    }
+  async addDomainToHostFileIfMissing(domain: string) {    
+    // No need to check if the domain is present, as hostile will handle the case where the domain is already in the host file.
+    run(`sudo "${process.execPath}" "${require.resolve('hostile/bin/cmd')}" set 127.0.0.1 ${domain}`);
   }
-
   async readProtectedFile(filepath: string) {
     return (await run(`sudo cat "${filepath}"`)).toString().trim();
   }
