@@ -1,7 +1,6 @@
 import { Options } from '../index';
 import { Platform } from '.';
 export default class WindowsPlatform implements Platform {
-    private HOST_FILE_PATH;
     /**
      * Windows is at least simple. Like macOS, most applications will delegate to
      * the system trust store, which is updated with the confusingly named
@@ -14,6 +13,6 @@ export default class WindowsPlatform implements Platform {
     addDomainToHostFileIfMissing(domain: string): Promise<void>;
     readProtectedFile(filepath: string): Promise<string>;
     writeProtectedFile(filepath: string, contents: string): Promise<void>;
-    private encrypt(text, key);
-    private decrypt(encrypted, key);
+    private encrypt;
+    private decrypt;
 }

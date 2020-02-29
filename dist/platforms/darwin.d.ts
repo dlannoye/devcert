@@ -4,7 +4,6 @@ export default class MacOSPlatform implements Platform {
     private FIREFOX_BUNDLE_PATH;
     private FIREFOX_BIN_PATH;
     private FIREFOX_NSS_DIR;
-    private HOST_FILE_PATH;
     /**
      * macOS is pretty simple - just add the certificate to the system keychain,
      * and most applications will delegate to that for determining trusted
@@ -16,6 +15,6 @@ export default class MacOSPlatform implements Platform {
     addDomainToHostFileIfMissing(domain: string): Promise<void>;
     readProtectedFile(filepath: string): Promise<string>;
     writeProtectedFile(filepath: string, contents: string): Promise<void>;
-    private isFirefoxInstalled();
-    private isNSSInstalled();
+    private isFirefoxInstalled;
+    private isNSSInstalled;
 }

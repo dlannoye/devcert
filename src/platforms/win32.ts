@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { writeFileSync as write, readFileSync as read } from 'fs';
 import { Options } from '../index';
 import { openCertificateInFirefox } from './shared';
-import { Platform, domainExistsInHostFile } from '.';
+import { Platform } from '.';
 import { run, sudo } from '../utils';
 import UI from '../user-interface';
 
@@ -12,8 +12,6 @@ const debug = createDebug('devcert:platforms:windows');
 let encryptionKey: string;
 
 export default class WindowsPlatform implements Platform {
-
-  private HOST_FILE_PATH = 'C:\\Windows\\System32\\Drivers\\etc\\hosts';
 
   /**
    * Windows is at least simple. Like macOS, most applications will delegate to
@@ -40,16 +38,12 @@ export default class WindowsPlatform implements Platform {
     try {
       await openCertificateInFirefox('start firefox', certificatePath);
     } catch {
-      // Ignore exception, most likely Firefox doesn't exist.
+      debug('Error opening Firefox, most likely Firefox is not installed');
     }
   }
 
   async addDomainToHostFileIfMissing(domain: string) {
-    const hostsFileContents = read(this.HOST_FILE_PATH, 'utf8');
-
-    if (!domainExistsInHostFile(hostsFileContents, domain)) {
-      await sudo(`echo 127.0.0.1  ${ domain } >> ${ this.HOST_FILE_PATH }`);
-    }
+      await sudo(`"${process.execPath}" "${require.resolve('hostile/bin/cmd')}" set 127.0.0.1 ${domain}`);
   }
 
   async readProtectedFile(filepath: string): Promise<string> {
