@@ -1,12 +1,12 @@
 import path from 'path';
-import { existsSync as exists, readFileSync as read, writeFileSync as writeFile } from 'fs';
+import { existsSync as exists, writeFileSync as writeFile } from 'fs';
 import createDebug from 'debug';
 import { sync as commandExists } from 'command-exists';
 import { addCertificateToNSSCertDB, openCertificateInFirefox, closeFirefox } from './shared';
 import { run } from '../utils';
 import { Options } from '../index';
 import UI from '../user-interface';
-import { Platform, domainExistsInHostFile } from '.';
+import { Platform } from '.';
 
 const debug = createDebug('devcert:platforms:linux');
 
@@ -16,8 +16,6 @@ export default class LinuxPlatform implements Platform {
   private CHROME_NSS_DIR = path.join(process.env.HOME, '.pki/nssdb');
   private FIREFOX_BIN_PATH = '/usr/bin/firefox';
   private CHROME_BIN_PATH = '/usr/bin/google-chrome';
-
-  private HOST_FILE_PATH = '/etc/hosts';
 
   /**
    * Linux is surprisingly difficult. There seems to be multiple system-wide
@@ -67,15 +65,12 @@ export default class LinuxPlatform implements Platform {
       debug('Chrome does not appear to be installed, skipping Chrome-specific steps...');
     }
   }
-
+  
   async addDomainToHostFileIfMissing(domain: string) {
-    let hostsFileContents = read(this.HOST_FILE_PATH, 'utf8');
-
-    if (!domainExistsInHostFile(hostsFileContents, domain)) {
-      run(`echo '127.0.0.1  ${ domain }' | sudo tee -a "${ this.HOST_FILE_PATH }" > /dev/null`);
-    }
+    // No need to check if the domain is present, as hostile will handle the case where the domain is already in the host file.
+    run(`sudo "${process.execPath}" "${require.resolve('hostile/bin/cmd')}" set 127.0.0.1 ${domain}`);
   }
-
+  
   async readProtectedFile(filepath: string) {
     return (await run(`sudo cat ${filepath}`)).toString().trim();
   }

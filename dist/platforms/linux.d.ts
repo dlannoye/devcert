@@ -5,7 +5,6 @@ export default class LinuxPlatform implements Platform {
     private CHROME_NSS_DIR;
     private FIREFOX_BIN_PATH;
     private CHROME_BIN_PATH;
-    private HOST_FILE_PATH;
     /**
      * Linux is surprisingly difficult. There seems to be multiple system-wide
      * repositories for certs, so we copy ours to each. However, Firefox does it's
@@ -19,6 +18,6 @@ export default class LinuxPlatform implements Platform {
     addDomainToHostFileIfMissing(domain: string): Promise<void>;
     readProtectedFile(filepath: string): Promise<string>;
     writeProtectedFile(filepath: string, contents: string): Promise<void>;
-    private isFirefoxInstalled();
-    private isChromeInstalled();
+    private isFirefoxInstalled;
+    private isChromeInstalled;
 }
